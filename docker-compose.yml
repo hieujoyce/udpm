@@ -1,0 +1,62 @@
+version: "3"
+
+services:
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    command: mysqld --default-authentication-plugin=mysql_native_password
+    volumes:
+      - .data/mysql:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=app
+      - MYSQL_USER=app
+      - MYSQL_PASSWORD=123456
+    networks:
+      - app-network
+
+  # node_server:
+  #   container_name: node_server
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - mysql
+  #   networks:
+  #     - app-network
+
+  # phpmyadmin:
+  #   image: phpmyadmin/phpmyadmin
+  #   environment:
+  #     - PMA_ARBITRARY=0
+  #     - PMA_HOST=mysql
+  #     - PMA_PORT=3306
+  #     - PMA_USER=app
+  #     - PMA_PASSWORD=secret
+  #   ports:
+  #     - "81:80"
+  #   volumes:
+  #     - /sessions
+  #   networks:
+  #     - app-network
+
+  # minio:
+  #   image: minio/minio
+  #   volumes:
+  #   - .data/minio/:/data
+  #   ports:
+  #   - "9000:9000"
+  #   environment:
+  #   - MINIO_ACCESS_KEY=app
+  #   - MINIO_SECRET_KEY=secretsecret
+  #   - MINIO_REGION=us-west-2
+  #   command: server /data
+  #   networks:
+  #   - app-network
+
+networks:
+  app-network:
+    driver: bridge
