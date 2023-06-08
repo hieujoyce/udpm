@@ -1,4 +1,4 @@
-FROM node:12.18.2
+FROM node:14
 WORKDIR /app
 EXPOSE 3000
 ENV NODE_ENV=dev

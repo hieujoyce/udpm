@@ -16,17 +16,18 @@ services:
     networks:
       - app-network
 
-  # node_server:
-  #   container_name: node_server
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "3000:3000"
-  #   depends_on:
-  #     - mysql
-  #   networks:
-  #     - app-network
+  node_server:
+    container_name: node_server
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+      - '8080:8080'
+    depends_on:
+      - mysql
+    networks:
+      - app-network
 
   # phpmyadmin:
   #   image: phpmyadmin/phpmyadmin
