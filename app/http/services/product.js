@@ -5,17 +5,13 @@ const { abort } = require('../../helpers/error');
 
 exports.create = async (params) => {
   // check product is already exits
-
   const isExitsProduct = await Products.query().findOne({
     productName: params.productName,
   });
-
   if (isExitsProduct) return abort(400, 'This product is already exits');
-
   const isExitsCategory = await Category.query().findById(params.categoryId);
 
   if (!isExitsCategory) return abort(400, 'This category is not already exits');
-
   const result = await Products.query().insert(params);
 
   return result;
@@ -93,7 +89,7 @@ exports.update = async (params) => {
   const category = await Category.query().findById(params.categoryId);
   if (!category) return abort(400, 'This category is not already exits');
 
-  const { productId, ...paramsWithoutId } = params;
+  const { productId, categoryId, ...paramsWithoutId } = params;
 
   const result = await Products.query()
     .findById(productId)

@@ -17,12 +17,16 @@ async function validation({ productId }) {
 
 async function remove(req, res) {
   const { productId } = req.params;
+  try {
+    await validation({ productId });
 
-  await validation({ productId });
+    await productService.remove({ productId });
+  } catch (error) {
+    console.log(error);
+    return abort(400, error.message);
+  }
 
-  await productService.remove({ productId });
-
-  return res.status(204).send();
+  return res.status(200).json({ message: 'Delete product success.' });
 }
 
 module.exports = remove;

@@ -6,7 +6,6 @@ const { uploadImage, upload3D } = require('../../../config/cloudinary');
 const convertToSlug = require('../../../utils/common');
 
 async function validation({
-  productId,
   productName,
   productSlug,
   productCode,
@@ -19,26 +18,26 @@ async function validation({
   productThumbnail,
   product3DModelPath,
   productImg,
+  quantity,
 }) {
   try {
     const schema = Joi.object().keys({
-      productId: Joi.number().min(1),
-      productName: Joi.string(),
-      productSlug: Joi.string(),
-      categoryId: Joi.number().integer().min(0),
-      productCode: Joi.string(),
-      productSize: Joi.string(),
-      productColor: Joi.string(),
-      sellingPrice: Joi.number().min(0),
-      discountPrice: Joi.number().min(0),
-      productDescription: Joi.string(),
-      productThumbnail: Joi.string(),
-      product3DModelPath: Joi.string(),
-      productImg: Joi.string(),
+      productName: Joi.string().required(),
+      productSlug: Joi.string().required(),
+      categoryId: Joi.number().integer().min(0).required(),
+      productCode: Joi.string().required(),
+      productSize: Joi.string().required(),
+      productColor: Joi.string().required(),
+      sellingPrice: Joi.number().min(0).required(),
+      discountPrice: Joi.number().min(0).required(),
+      productDescription: Joi.string().required(),
+      productThumbnail: Joi.string().required(),
+      product3DModelPath: Joi.string().required(),
+      productImg: Joi.string().required(),
+      quantity: Joi.number().min(0).required(),
     });
 
     return await schema.validateAsync({
-      productId,
       productName,
       productSlug,
       productCode,
@@ -51,6 +50,7 @@ async function validation({
       productThumbnail,
       product3DModelPath,
       productImg,
+      quantity,
     });
   } catch (error) {
     return abort(400, 'Params error');
@@ -59,43 +59,51 @@ async function validation({
 
 async function update(req, res) {
   try {
-    const { productId, categoryId } = req.params;
+    const { productId } = req.params;
 
-    const params = req.body;
-    const listFile = req.files;
-    const findIndexHaveFileIsGlb = listFile.findIndex((file) =>
-      file.originalname.includes('.glb')
-    );
-    const resultFile3D = await upload3D(listFile[findIndexHaveFileIsGlb]?.path);
-
-    listFile.splice(findIndexHaveFileIsGlb, 1);
-    const resultFileImage = await uploadImage(listFile[0]?.path);
-
-    const productImages = [];
-    for (let i = 1; i < listFile.length; i++) {
-      const imageURL = await uploadImage(listFile[i]?.path);
-      productImages.push(imageURL?.secure_url);
-    }
-    const productSlug = convertToSlug(params.productName);
-
+    const {
+      productName,
+      productSize,
+      productColor,
+      discountPrice,
+      sellingPrice,
+      productDescription,
+      productImg,
+      quantity,
+      categoryId,
+    } = req.body;
+    const productCode = `${productName}${Math.floor(Math.random() * 1000)}`;
     await validation({
-      ...params,
-      productId: productId,
-      categoryId: categoryId,
-      productSlug,
-      productImg: productImages.join(','),
-      product3DModelPath: resultFile3D?.secure_url,
-      productThumbnail: resultFileImage?.secure_url,
+      productName,
+      productSlug: productName,
+      productCode,
+      productSize,
+      productColor,
+      discountPrice,
+      sellingPrice,
+      productDescription,
+      categoryId,
+      productThumbnail: productDescription,
+      product3DModelPath: 'product3DModelPath',
+      productImg,
+      quantity,
     });
 
     const data = await productService.update({
-      ...params,
-      productId: productId,
-      categoryId: categoryId,
-      productImg: productImages.join(','),
-      productSlug,
-      product3DModelPath: resultFile3D?.secure_url,
-      productThumbnail: resultFileImage?.secure_url,
+      productId,
+      productName,
+      productSlug: productName,
+      productCode,
+      productSize,
+      productColor,
+      discountPrice,
+      sellingPrice,
+      productDescription,
+      categoryId,
+      productThumbnail: productDescription,
+      product3DModelPath: 'product3DModelPath',
+      productImg,
+      quantity,
     });
     if (data) {
       return res.status(200).send({

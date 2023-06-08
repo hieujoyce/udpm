@@ -16,7 +16,6 @@ exports.updateUser = async ({ userInformation, userImg, id }) => {
         ...userInformation,
         image: userImg?.secure_url,
       });
-
     return result;
   } catch (error) {
     abort(error.status, error.message);

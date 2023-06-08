@@ -10,6 +10,7 @@ exports.up = async (knex) => {
     table.string('productSize', 50).notNullable();
     table.string('productColor', 50).notNullable();
     table.integer('sellingPrice').unsigned().notNullable();
+    table.integer('quantity').unsigned().notNullable();
     table.integer('discountPrice').unsigned().notNullable();
     table
       .string('product3DModelPath')

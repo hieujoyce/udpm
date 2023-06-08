@@ -7,20 +7,13 @@ const checkPermission = require('../http/middlewares/permission');
 
 const router = express.Router();
 
-router.post(
-  '/products',
-  auth,
-  checkPermission,
-  upload.array('files'),
-  productController.create
-);
+router.post('/products', auth, checkPermission, productController.create);
 router.get('/products', productController.getList);
 router.get('/products/:productId', productController.getDetail);
 router.put(
-  '/products/:productId/:categoryId',
+  '/products/:productId',
   auth,
   checkPermission,
-  upload.array('files'),
   productController.update
 );
 router.delete(
