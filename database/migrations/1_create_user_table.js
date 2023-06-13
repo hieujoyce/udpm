@@ -13,6 +13,7 @@ exports.up = async (knex) => {
     table.string('gender', 3).collate('utf8_general_ci').nullable();
     table.date('dateOfBirth').nullable();
     table.string('code', 256).nullable();
+    table.string('shippingId', 256).nullable();
     table.timestamp('code_time').nullable();
     table.string('image', 120).collate('latin1_general_ci').nullable();
 

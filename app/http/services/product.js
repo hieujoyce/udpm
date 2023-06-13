@@ -49,14 +49,6 @@ exports.getList = async ({ limit, page, categoryId, userId, sortBy }) => {
   products = await products;
   [{ 'count(*)': total }] = await total;
 
-  products = products.map((product) => {
-    const productThumbnailArray = product.productThumbnail.split(',');
-    return {
-      ...product,
-      productThumbnail: productThumbnailArray,
-    };
-  });
-
   if (favoriteList) {
     products = products.map((item) => {
       if (favoriteList.includes(item.id)) {

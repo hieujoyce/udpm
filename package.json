@@ -41,6 +41,7 @@
     "mysql": "^2.18.1",
     "nodemailer": "^6.4.16",
     "objection": "^2.2.1",
+    "qs": "^6.11.2",
     "randomstring": "^1.2.1",
     "request": "^2.88.2",
     "shortid": "^2.2.15",

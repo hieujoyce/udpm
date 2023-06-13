@@ -1,6 +1,6 @@
 const { abort } = require('../../helpers/error');
 // @ts-ignore
-const { Orders, OrdersDetail } = require('../../models');
+const { Orders, OrdersDetail, Products } = require('../../models');
 // @ts-ignore
 const Cart = require('../../models/Cart');
 
@@ -8,12 +8,43 @@ exports.createOrder = async ({ userId, data }) => {
   try {
     let result = [];
     const { cartItems } = data;
+    const findListCartById = await Cart.query().findByIds(cartItems);
+    let notifiArr = [];
+    let productQuantityArr = [];
+    for (let i = 0; i < findListCartById.length; i++) {
+      let item = findListCartById[i];
+      let productId = item.productId,
+        quantity = item.quantity;
+      const isExitsProduct = await Products.query().findOne({
+        id: productId,
+      });
+      productQuantityArr.push(isExitsProduct.quantity);
+      if (quantity > isExitsProduct.quantity) {
+        let el = `Số lượng ản phẩm ${isExitsProduct.productName} phải nhỏ hơn ${
+          isExitsProduct.quantity + 1
+        }`;
+        notifiArr.push(el);
+      }
+    }
+
+    if (notifiArr.length > 0) {
+      return abort(400, notifiArr.join(','));
+    }
+
+    for (let i = 0; i < findListCartById.length; i++) {
+      let item = findListCartById[i];
+      let productId = item.productId;
+      await Products.query().patchAndFetchById(productId, {
+        quantity: productQuantityArr[i] - findListCartById[i].quantity,
+      });
+    }
+
     const createOrder = await Orders.query().insert({
       shippingId: data.shippingId,
       status: 'pending',
       userId,
     });
-    const findListCartById = await Cart.query().findByIds(cartItems);
+
     const orderData = await OrdersDetail.query().insertGraph(
       findListCartById.map((item) => ({
         orderId: createOrder.id,
@@ -31,7 +62,7 @@ exports.createOrder = async ({ userId, data }) => {
     });
     if (result.length > 0) return result;
   } catch (error) {
-    abort(500, error);
+    abort(500, error.message);
   }
 };
 

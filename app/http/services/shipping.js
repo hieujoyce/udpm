@@ -1,5 +1,5 @@
 const { abort } = require('../../helpers/error');
-const shippingDetail = require('../../models/ShippingDetail');
+const { ShippingDetail: shippingDetail, User } = require('../../models');
 
 exports.getShippingByUser = async ({ userId }) => {
   try {
@@ -37,8 +37,12 @@ exports.createShipping = async (userId, data) => {
       userId,
       ...data,
     });
+    const shippingUpdate = await User.query().patchAndFetchById(userId, {
+      shippingId: shipping.id,
+    });
     return shipping;
   } catch (error) {
+    console.log(error);
     abort(400, error.message);
   }
 };

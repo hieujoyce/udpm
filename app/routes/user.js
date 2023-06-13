@@ -8,6 +8,7 @@ const router = express.Router();
 
 router.get('/users', auth, checkPermission, userController.getUsers);
 router.put('/users/:id', upload.single('userImg'), userController.updateUser);
+router.post('/updateUserShipping', auth, userController.updateUserShipping);
 router.post(
   '/users/:id',
   auth,

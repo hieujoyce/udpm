@@ -1,4 +1,5 @@
 const { createOrder } = require('../../services/orders');
+const { abort } = require('../../../helpers/error');
 
 async function create(req, res, next) {
   try {
@@ -12,7 +13,8 @@ async function create(req, res, next) {
       message: 'Create order successfully',
     });
   } catch (error) {
-    next(error);
+    abort(error.statusCode, error.message);
+    //next(error);
   }
 }
 

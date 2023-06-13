@@ -1,7 +1,7 @@
 const favoriteService = require('../../services/favorite');
 async function removeFavorite(req, res, next) {
   try {
-    const { productId } = req.body;
+    const { id: productId } = req.params;
     const userId = req.user.id;
     await favoriteService.removeFavorite({
       productId,
