@@ -57,10 +57,14 @@ exports.createOrder = async ({ userId, data }) => {
     );
     result.push(orderData);
     // delete all cart item
-    console.log(cartItems);
-    cartItems.forEach(async (item) => {
-      await Cart.query().deleteById(item);
-    });
+    // console.log(cartItems);
+    if (Array.isArray(cartItems)) {
+      cartItems.forEach(async (item) => {
+        await Cart.query().deleteById(item);
+      });
+    } else {
+      await Cart.query().deleteById(cartItems);
+    }
     if (result.length > 0) return { result, order: createOrder };
   } catch (error) {
     abort(500, error.message);
