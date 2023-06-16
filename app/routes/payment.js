@@ -5,7 +5,8 @@ const stripe = require('stripe')(
 const { auth } = require('../http/middlewares');
 const { abort } = require('../helpers/error');
 // @ts-ignore
-const { Orders, OrdersDetail } = require('../models');
+const { Orders, OrdersDetail, Cart } = require('../models');
+const { getActiveCart } = require('../http/services/cart');
 
 function sortObject(obj) {
   let sorted = {};
@@ -57,7 +58,7 @@ router.post('/payment-srtipe', auth, async (req, res) => {
         });
       }
       //console.log(result);
-      console.log(result[0].paymentType + ' ' + result[0].paymentId);
+      //console.log(result[0].paymentType + ' ' + result[0].paymentId);
       if (result[0].paymentType && result[0].paymentId) {
         return res.status(400).json({
           message: 'Đơn hàng này đã được thanh toán tiền.',
@@ -88,6 +89,12 @@ router.post('/payment-srtipe', auth, async (req, res) => {
           paymentId: `${Math.floor(Math.random() * 1000000000000)}${total}`,
         }
       );
+      const cartArr = await getActiveCart({ userId: req.user.id });
+      const cartIdArr = cartArr.map((el) => el.id);
+      cartIdArr.forEach(async (item) => {
+        await Cart.query().deleteById(item);
+      });
+      //console.log(cartIdArr);
 
       return res.json({
         message: 'Đã thanh toán thành công',

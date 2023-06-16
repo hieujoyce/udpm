@@ -6,6 +6,7 @@ const checkPermission = require('../http/middlewares/permission');
 const router = express.Router();
 
 router.post('/orders', auth, ordersController.create);
+router.delete('/orders/:id', auth, ordersController.deleteC);
 router.get('/orders', auth, ordersController.getAllByUserId);
 router.get('/orders/getOrdersById/:id', auth, ordersController.getOrdersById);
 router.get(

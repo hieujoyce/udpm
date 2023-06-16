@@ -4,10 +4,43 @@ const { Orders, OrdersDetail, Products } = require('../../models');
 // @ts-ignore
 const Cart = require('../../models/Cart');
 
+exports.deleteOrder = async ({ orderId, userId }) => {
+  try {
+    const order = await Orders.query().findOne({ id: orderId });
+    if (!order) abort(400, 'OrderId không chính xác');
+    const ordersDetailArr = await OrdersDetail.query().where(
+      'orderId',
+      orderId
+    );
+
+    ordersDetailArr
+      .map((el) => el.id)
+      .forEach(async (item) => {
+        await OrdersDetail.query().deleteById(item);
+      });
+
+    await Orders.query().deleteById(orderId);
+
+    // console.log(ordersDetailArr.map((el) => el.id));
+    return 1;
+  } catch (error) {
+    abort(500, error.message);
+  }
+};
+
 exports.createOrder = async ({ userId, data }) => {
   try {
     let result = [];
     const { cartItems } = data;
+    if (
+      typeof cartItems == 'number' ||
+      Array.isArray(cartItems) ||
+      (typeof cartItems == 'string' && !isNaN(cartItems))
+    ) {
+      //console.log('Hello');
+    } else {
+      return abort(400, 'Lỗi kiểu dữ liệu cartItems');
+    }
     const findListCartById = await Cart.query().findByIds(cartItems);
     let notifiArr = [];
     let productQuantityArr = [];
@@ -57,14 +90,14 @@ exports.createOrder = async ({ userId, data }) => {
     );
     result.push(orderData);
     // delete all cart item
-    // console.log(cartItems);
-    if (Array.isArray(cartItems)) {
-      cartItems.forEach(async (item) => {
-        await Cart.query().deleteById(item);
-      });
-    } else {
-      await Cart.query().deleteById(cartItems);
-    }
+
+    // if (Array.isArray(cartItems)) {
+    //   cartItems.forEach(async (item) => {
+    //     await Cart.query().deleteById(item);
+    //   });
+    // } else {
+    //   await Cart.query().deleteById(cartItems);
+    // }
     if (result.length > 0) return { result, order: createOrder };
   } catch (error) {
     abort(500, error.message);
