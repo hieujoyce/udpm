@@ -1,6 +1,7 @@
 const { abort } = require('../../helpers/error');
 // @ts-ignore
 const { Orders, OrdersDetail, Products } = require('../../models');
+const { updateCart } = require('./cart');
 // @ts-ignore
 const Cart = require('../../models/Cart');
 
@@ -31,7 +32,7 @@ exports.deleteOrder = async ({ orderId, userId }) => {
 exports.createOrder = async ({ userId, data }) => {
   try {
     let result = [];
-    const { cartItems } = data;
+    const { cartItems, quantityCartItems } = data;
     if (
       typeof cartItems == 'number' ||
       Array.isArray(cartItems) ||
@@ -40,6 +41,22 @@ exports.createOrder = async ({ userId, data }) => {
       //console.log('Hello');
     } else {
       return abort(400, 'Lỗi kiểu dữ liệu cartItems');
+    }
+    if (
+      typeof quantityCartItems == 'number' ||
+      Array.isArray(quantityCartItems) ||
+      (typeof quantityCartItems == 'string' && !isNaN(quantityCartItems))
+    ) {
+      //console.log('Hello');
+    } else {
+      return abort(400, 'Lỗi kiểu dữ liệu quantityCartItems');
+    }
+    if (!Array.isArray(cartItems) && !Array.isArray(cartItems)) {
+      await updateCart(cartItems, { quantity: quantityCartItems });
+    } else {
+      for (let i = 0; i < cartItems.length; i++) {
+        await updateCart(cartItems[i], { quantity: quantityCartItems[i] });
+      }
     }
     const findListCartById = await Cart.query().findByIds(cartItems);
     let notifiArr = [];
@@ -100,6 +117,7 @@ exports.createOrder = async ({ userId, data }) => {
     // }
     if (result.length > 0) return { result, order: createOrder };
   } catch (error) {
+    console.log(error);
     abort(500, error.message);
   }
 };

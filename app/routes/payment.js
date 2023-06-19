@@ -74,7 +74,7 @@ router.post('/payment-srtipe', auth, async (req, res) => {
       };
 
       let total = data.ordersDetail.reduce((a, b) => {
-        return a + b.price;
+        return a + b.price * b.quantity;
       }, 0);
       if (stripe_Amount != total) {
         return res.status(400).json({

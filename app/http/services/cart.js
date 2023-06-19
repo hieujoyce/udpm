@@ -76,9 +76,9 @@ exports.emptyCart = async ({ userId }) => {
 
 exports.updateCart = async (id, params) => {
   try {
-    const { productId } = params;
-    let checkProduct = await Products.query().findById(productId);
-    if (!checkProduct) return abort(400, 'Products not found');
+    // const { productId } = params;
+    // let checkProduct = await Products.query().findById(productId);
+    // if (!checkProduct) return abort(400, 'Products not found');
     const result = await Cart.query().patchAndFetchById(id, {
       ...params,
     });
