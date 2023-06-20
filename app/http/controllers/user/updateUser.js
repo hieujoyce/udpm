@@ -10,7 +10,7 @@ async function validation(userInformation) {
     const schema = Joi.object().keys({
       fullName: Joi.string().max(127),
       address: Joi.string(),
-      gender: Joi.valid(...genderType.getValues()),
+      gender: Joi.string(),
       dateOfBirth: Joi.date(),
     });
     return await schema.validateAsync(userInformation);
