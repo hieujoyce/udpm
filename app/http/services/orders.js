@@ -125,12 +125,29 @@ exports.createOrder = async ({ userId, data }) => {
 exports.getAllOrdersByUserId = async ({ page, limit, userId, sortBy }) => {
   try {
     if (page < 1 || limit < 1) abort(400, 'Invalid page or limit');
+
     const result = await Orders.query()
       .where({ userId })
       .orderBy('id', sortBy || 'desc')
       .withGraphFetched('shipping')
       .page(page - 1, limit);
+
     if (!result) abort(400, 'Orders not found');
+
+    for (let i = 0; i < result.results.length; i++) {
+      const ordersDetail = await OrdersDetail.query()
+        .where({ orderId: result.results[i].id })
+        .withGraphFetched('product');
+      const data = {
+        ...result[0],
+        ordersDetail,
+      };
+      let total = data.ordersDetail.reduce((a, b) => {
+        return a + b.price * b.quantity;
+      }, 0);
+      result.results[i].totalAmount = total;
+    }
+
     return result;
   } catch (error) {
     abort(500, error.message);
