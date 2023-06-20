@@ -4,6 +4,7 @@ const { Orders, OrdersDetail, Products } = require('../../models');
 const { updateCart } = require('./cart');
 // @ts-ignore
 const Cart = require('../../models/Cart');
+const e = require('express');
 
 exports.deleteOrder = async ({ orderId, userId }) => {
   try {
@@ -138,14 +139,23 @@ exports.getAllOrdersByUserId = async ({ page, limit, userId, sortBy }) => {
       const ordersDetail = await OrdersDetail.query()
         .where({ orderId: result.results[i].id })
         .withGraphFetched('product');
-      const data = {
-        ...result[0],
-        ordersDetail,
-      };
-      let total = data.ordersDetail.reduce((a, b) => {
+      //console.log(ordersDetail);
+
+      const productsOrder = [];
+      ordersDetail.forEach((el) => {
+        productsOrder.push({
+          price: el.price,
+          quantity: el.quantity,
+          productName: el.product.productName,
+          productImg: el.product.productImg,
+          amount: el.price * el.quantity,
+        });
+      });
+      let total = ordersDetail.reduce((a, b) => {
         return a + b.price * b.quantity;
       }, 0);
       result.results[i].totalAmount = total;
+      result.results[i].productsOrder = productsOrder;
     }
 
     return result;
