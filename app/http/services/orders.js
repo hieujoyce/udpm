@@ -1,5 +1,6 @@
 const { abort } = require('../../helpers/error');
 // @ts-ignore
+const { raw } = require('objection');
 const { Orders, OrdersDetail, Products } = require('../../models');
 const { updateCart } = require('./cart');
 // @ts-ignore
@@ -15,11 +16,12 @@ exports.deleteOrder = async ({ orderId, userId }) => {
       orderId
     );
 
-    ordersDetailArr
-      .map((el) => el.id)
-      .forEach(async (item) => {
-        await OrdersDetail.query().deleteById(item);
+    ordersDetailArr.forEach(async (el) => {
+      await Products.query().patchAndFetchById(el.productId, {
+        quantity: raw(`quantity + ${el.quantity}`),
       });
+      await OrdersDetail.query().deleteById(el.id);
+    });
 
     await Orders.query().deleteById(orderId);
 
