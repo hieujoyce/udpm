@@ -173,15 +173,40 @@ exports.getAll = async ({ page, limit }) => {
       .withGraphFetched('shipping')
       .page(page - 1, limit);
     // fetch all order Detail of each order
-    const orderDetail = await OrdersDetail.query().withGraphFetched('product');
-    result.results.forEach((order) => {
-      orderDetail.forEach((detail) => {
-        if (order.id === detail.orderId) {
-          if (!order.orderDetail) order.orderDetail = [];
-          order.orderDetail.push(detail);
-        }
+
+    for (let i = 0; i < result.results.length; i++) {
+      const ordersDetail = await OrdersDetail.query()
+        .where({ orderId: result.results[i].id })
+        .withGraphFetched('product');
+      //console.log(ordersDetail);
+
+      const productsOrder = [];
+      ordersDetail.forEach((el) => {
+        productsOrder.push({
+          price: el.price,
+          quantity: el.quantity,
+          productName: el.product.productName,
+          productImg: el.product.productImg,
+          amount: el.price * el.quantity,
+        });
       });
-    });
+      let total = ordersDetail.reduce((a, b) => {
+        return a + b.price * b.quantity;
+      }, 0);
+      result.results[i].totalAmount = total;
+      result.results[i].productsOrder = productsOrder;
+    }
+
+    // const orderDetail = await OrdersDetail.query().withGraphFetched('product');
+
+    // result.results.forEach((order) => {
+    //   orderDetail.forEach((detail) => {
+    //     if (order.id === detail.orderId) {
+    //       if (!order.orderDetail) order.orderDetail = [];
+    //       order.orderDetail.push(detail);
+    //     }
+    //   });
+    // });
     return result;
   } catch (error) {
     abort(500, error.message);
